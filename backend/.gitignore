@@ -1,0 +1,29 @@
+# Dependencies
+node_modules
+
+# Environment — nunca versionar segredos
+.env
+.env.local
+.env.*.local
+
+# Build
+dist/
+
+# Prisma generated client
+generated/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/

@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+tmp/
+out-tsc/
+
+# Angular cache
+.angular/
+
+# Logs
+npm-debug.log*
+yarn-error.log*
+
+# Editor
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# VS Code (manter configs úteis, ignorar o resto)
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/mcp.json
+.history/
+
+# Testes
+coverage/
+testem.log
+__screenshots__/
+
+# OS
+.DS_Store
+Thumbs.db
+Thumbs.db:encryptable
