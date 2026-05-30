@@ -72,9 +72,11 @@ type ViewType = 'KANBAN' | 'LIST';
             </button>
           </div>
 
-          <button (click)="openNewTask()" class="btn-primary">
-            + Nova tarefa
-          </button>
+          @if (!isGeneral()) {
+            <button (click)="openNewTask()" class="btn-primary">
+              + Nova tarefa
+            </button>
+          }
         </div>
       </div>
 
@@ -123,6 +125,42 @@ type ViewType = 'KANBAN' | 'LIST';
                 </div>
               </div>
             }
+
+            <!-- Add column -->
+            <div class="w-72 shrink-0 flex flex-col justify-start">
+              @if (!showAddColumnForm()) {
+                <button
+                  (click)="showAddColumnForm.set(true)"
+                  class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors w-full"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                  </svg>
+                  Adicionar coluna
+                </button>
+              } @else {
+                <form (ngSubmit)="addColumn()" class="card p-3 space-y-2">
+                  <input
+                    [(ngModel)]="newColTitle"
+                    name="colTitle"
+                    class="input text-sm"
+                    placeholder="Nome da coluna..."
+                    autofocus
+                    (keydown.escape)="showAddColumnForm.set(false)"
+                  />
+                  <div class="flex items-center gap-2">
+                    <input
+                      [(ngModel)]="newColColor"
+                      type="color"
+                      name="colColor"
+                      class="h-8 w-8 rounded border border-gray-300 cursor-pointer shrink-0"
+                    />
+                    <button type="submit" class="btn-primary text-sm flex-1">Criar</button>
+                    <button type="button" (click)="showAddColumnForm.set(false)" class="btn-secondary text-sm">✕</button>
+                  </div>
+                </form>
+              }
+            </div>
           </div>
         </div>
       }
@@ -183,7 +221,7 @@ type ViewType = 'KANBAN' | 'LIST';
       <app-task-modal
         [task]="selectedTask()!"
         [columns]="visibleColumns()"
-        [projectId]="id()"
+        [projectId]="id() || selectedTask()!.projectId"
         (close)="selectedTask.set(null)"
         (taskUpdated)="onTaskUpdated($event)"
       />
@@ -217,13 +255,18 @@ type ViewType = 'KANBAN' | 'LIST';
   `,
 })
 export class BoardComponent implements OnInit {
-  readonly id = input.required<string>();
+  readonly id = input<string>('');
+
+  readonly isGeneral = computed(() => !this.id());
 
   readonly view = signal<ViewType>('KANBAN');
   readonly selectedTask = signal<Task | null>(null);
   readonly showNewTaskForm = signal(false);
+  readonly showAddColumnForm = signal(false);
   newTaskTitle = '';
   newTaskColumnId = '';
+  newColTitle = '';
+  newColColor = '#6366f1';
 
   readonly currentProject = computed(() =>
     this.projectsService.projects().find((p) => p.id === this.id()),
@@ -304,6 +347,14 @@ export class BoardComponent implements OnInit {
 
   toggleSubtask(task: Task, subtaskId: string, done: boolean): void {
     this.tasksService.toggleSubtask(task.id, subtaskId, done).subscribe();
+  }
+
+  addColumn(): void {
+    if (!this.newColTitle.trim()) return;
+    this.columnsService.create(this.newColTitle.trim(), this.newColColor).subscribe();
+    this.newColTitle = '';
+    this.newColColor = '#6366f1';
+    this.showAddColumnForm.set(false);
   }
 
   priorityDot(priority: string): string {
